@@ -1,0 +1,48 @@
+<RunSettings>
+  <DataCollectionRunSettings>
+    <DataCollectors>
+      <DataCollector friendlyName="XPlat Code Coverage">
+        <Configuration>
+          <!-- Formato -->
+          <Format>cobertura</Format>
+
+          <!-- INCLUIR solo estos ensamblados -->
+          <!-- Ajusta a lo que quieras medir -->
+          <Include>
+            [UsersService.Application]*,
+            [UsersService.Domain]*
+            <!-- Si vas a correr también products en el mismo dotnet test -->
+            ,[ProductsService.Application]*,
+            [ProductsService.Domain]*
+          </Include>
+
+          <!-- EXCLUIR ensamblados -->
+          <Exclude>
+            [*.Tests]*,
+            [xunit.*]*,
+            [Microsoft.*]*,
+            [System.*]*,
+            [Serilog*]*
+          </Exclude>
+
+          <!-- EXCLUIR archivos concretos -->
+          <ExcludeByFile>
+            **/Program.cs;
+            **/Startup.cs;
+            **/*Migrations/*.cs;
+            **/*Designer.cs;
+            **/obj/**/*.cs;
+            **/bin/**/*.cs
+          </ExcludeByFile>
+
+          <!-- EXCLUIR por atributo (opcional) -->
+          <ExcludeByAttribute>
+            Obsolete,
+            CompilerGenerated,
+            System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage
+          </ExcludeByAttribute>
+        </Configuration>
+      </DataCollector>
+    </DataCollectors>
+  </DataCollectionRunSettings>
+</RunSettings>

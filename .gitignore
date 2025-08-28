@@ -1,0 +1,90 @@
+# -----------------------------
+# SO / IDE
+# -----------------------------
+# Windows
+Thumbs.db
+ehthumbs.db
+[Dd]esktop.ini
+
+# macOS
+.DS_Store
+
+# VS / Rider / VSCode
+.vs/
+.idea/
+.vscode/*
+!.vscode/extensions.json
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# -----------------------------
+# .NET build artifacts
+# -----------------------------
+**/bin/
+**/obj/
+**/Generated/        # si usas source generators
+
+# -----------------------------
+# Tests & Cobertura
+# -----------------------------
+**/TestResults/
+**/TestResult*/
+tests/coverage-report/
+coverage/
+coverage.cobertura.xml
+.coverage
+*.coverage
+*.coveragexml
+
+# -----------------------------
+# Paquetes (normalmente no se versionan)
+# -----------------------------
+*.nupkg
+*.snupkg
+packages/
+
+# -----------------------------
+# Logs (Serilog)
+# -----------------------------
+logs/
+**/logs/
+*.log
+
+# -----------------------------
+# Config locales / secretos
+# -----------------------------
+# Recomendado: NO versionar appsettings con secretos reales.
+# En su lugar, sube appsettings.Sample.json y usa variables de entorno.
+appsettings.json
+**/appsettings.Local.json
+**/appsettings.*.local.json
+secrets.json
+.env
+.env.*
+
+# Si quieres SÍ versionar los appsettings base de cada servicio,
+# comenta la línea anterior y agrega reglas más finas, por ejemplo:
+# !src/**/appsettings.json
+# !src/**/ocelot.json
+
+# -----------------------------
+# EF Core / Herramientas
+# -----------------------------
+*.dbmdl
+*.jfm
+Migrations/          # si no quieres versionar migraciones (opcional)
+
+# -----------------------------
+# Publicaciones
+# -----------------------------
+**/publish/
+**/out/
+
+# -----------------------------
+# Otros temporales
+# -----------------------------
+*.tmp
+*.temp
+~$*
