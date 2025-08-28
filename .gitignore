@@ -55,26 +55,27 @@ logs/
 # -----------------------------
 # Config locales / secretos
 # -----------------------------
-# Recomendado: NO versionar appsettings con secretos reales.
-# En su lugar, sube appsettings.Sample.json y usa variables de entorno.
-appsettings.json
+# IMPORTANTE: En esta prueba técnica SÍ versionamos appsettings.json y ocelot.json
+# para que el proyecto funcione al clonar SIN pasos extra.
+# (Se siguen ignorando variantes locales/secretos y .env)
+
+# Excepciones: incluir appsettings.json y ocelot.json que estén bajo src/**
+!src/**/appsettings.json
+!src/**/ocelot.json
+
+# Mantener ignorados archivos locales/secretos
 **/appsettings.Local.json
 **/appsettings.*.local.json
 secrets.json
 .env
 .env.*
 
-# Si quieres SÍ versionar los appsettings base de cada servicio,
-# comenta la línea anterior y agrega reglas más finas, por ejemplo:
-# !src/**/appsettings.json
-# !src/**/ocelot.json
-
 # -----------------------------
 # EF Core / Herramientas
 # -----------------------------
 *.dbmdl
 *.jfm
-Migrations/          # si no quieres versionar migraciones (opcional)
+# Migrations/          # descomenta si NO quieres versionar migraciones
 
 # -----------------------------
 # Publicaciones

@@ -1,0 +1,273 @@
+import { zodResolver } from '@hookform/resolvers/zod'
+import { ArrowRight, Lock, Mail, Sparkles, User, UserPlus } from 'lucide-react'
+import { useForm } from 'react-hook-form'
+import toast from 'react-hot-toast'
+import { useNavigate } from 'react-router-dom'
+import { z } from 'zod'
+import { register as registerUser } from '../../service/authService'
+import { useAuthStore } from '../../store/authStore'
+import type { ProblemDetails } from '../../types/problemDetails'
+
+const schema = z
+  .object({
+    name: z.string().min(2, 'El nombre debe tener al menos 2 caracteres'),
+    email: z.string().email('Email inválido'),
+    password: z
+      .string()
+      .min(6, 'La contraseña debe tener al menos 6 caracteres'),
+    confirmPassword: z.string(),
+    role: z.string().optional(),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: 'Las contraseñas no coinciden',
+    path: ['confirmPassword'],
+  })
+
+type FormData = z.infer<typeof schema>
+
+export default function RegisterPage() {
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+  } = useForm<FormData>({ resolver: zodResolver(schema) })
+  const doLogin = useAuthStore((s) => s.login)
+  const navigate = useNavigate()
+
+  const onSubmit = async (form: FormData) => {
+    try {
+      const { confirmPassword, ...userData } = form
+      const res = await registerUser(userData)
+      doLogin(res)
+      toast.success('Registro exitoso')
+      navigate('/')
+    } catch (pd: unknown) {
+      const error = pd as ProblemDetails
+      toast.error(error?.title || error?.detail || 'Error en el registro')
+    }
+  }
+
+  return (
+    <div
+      style={{
+        minHeight: '100vh',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: '2rem',
+      }}
+    >
+      <div
+        className="futuristic-container fade-in-up"
+        style={{ maxWidth: '500px', width: '100%' }}
+      >
+        {/* Header con icono */}
+        <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
+          <div
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '0.5rem',
+              marginBottom: '1rem',
+            }}
+          >
+            <Sparkles size={32} color="#667eea" />
+            <span
+              style={{
+                fontSize: '1.5rem',
+                fontWeight: '700',
+                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+                backgroundClip: 'text',
+              }}
+            >
+              ProductHub
+            </span>
+          </div>
+          <h1 className="futuristic-title">Crear Cuenta</h1>
+          <p className="futuristic-subtitle">
+            Únete a nuestra plataforma de gestión de productos
+          </p>
+        </div>
+
+        {/* Formulario */}
+        <form
+          onSubmit={handleSubmit(onSubmit)}
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '1.5rem',
+            width: '100%',
+            maxWidth: '400px',
+            margin: '0 auto',
+          }}
+        >
+          <div>
+            <div style={{ position: 'relative', marginBottom: '0.5rem' }}>
+              <User
+                size={20}
+                style={{
+                  position: 'absolute',
+                  left: '12px',
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  color: 'rgba(255, 255, 255, 0.6)',
+                }}
+              />
+              <input
+                {...register('name')}
+                type="text"
+                placeholder="Nombre completo"
+                className="futuristic-input"
+                style={{
+                  paddingLeft: '44px',
+                  width: '100%',
+                  boxSizing: 'border-box',
+                }}
+              />
+            </div>
+            {errors.name && (
+              <div className="error-message">{errors.name.message}</div>
+            )}
+          </div>
+
+          <div>
+            <div style={{ position: 'relative', marginBottom: '0.5rem' }}>
+              <Mail
+                size={20}
+                style={{
+                  position: 'absolute',
+                  left: '12px',
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  color: 'rgba(255, 255, 255, 0.6)',
+                }}
+              />
+              <input
+                {...register('email')}
+                type="email"
+                placeholder="tu@empresa.com"
+                className="futuristic-input"
+                style={{
+                  paddingLeft: '44px',
+                  width: '100%',
+                  boxSizing: 'border-box',
+                }}
+              />
+            </div>
+            {errors.email && (
+              <div className="error-message">{errors.email.message}</div>
+            )}
+          </div>
+
+          <div>
+            <div style={{ position: 'relative', marginBottom: '0.5rem' }}>
+              <Lock
+                size={20}
+                style={{
+                  position: 'absolute',
+                  left: '12px',
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  color: 'rgba(255, 255, 255, 0.6)',
+                }}
+              />
+              <input
+                {...register('password')}
+                type="password"
+                placeholder="••••••••"
+                className="futuristic-input"
+                style={{
+                  paddingLeft: '44px',
+                  width: '100%',
+                  boxSizing: 'border-box',
+                }}
+              />
+            </div>
+            {errors.password && (
+              <div className="error-message">{errors.password.message}</div>
+            )}
+          </div>
+
+          <div>
+            <div style={{ position: 'relative', marginBottom: '0.5rem' }}>
+              <Lock
+                size={20}
+                style={{
+                  position: 'absolute',
+                  left: '12px',
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  color: 'rgba(255, 255, 255, 0.6)',
+                }}
+              />
+              <input
+                {...register('confirmPassword')}
+                type="password"
+                placeholder="Confirmar contraseña"
+                className="futuristic-input"
+                style={{
+                  paddingLeft: '44px',
+                  width: '100%',
+                  boxSizing: 'border-box',
+                }}
+              />
+            </div>
+            {errors.confirmPassword && (
+              <div className="error-message">
+                {errors.confirmPassword.message}
+              </div>
+            )}
+          </div>
+
+          {/* Campo oculto para el role */}
+          <input {...register('role')} type="hidden" value="User" />
+
+          <button
+            type="submit"
+            disabled={isSubmitting}
+            className="futuristic-button"
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '0.5rem',
+              marginTop: '1rem',
+              width: '100%',
+            }}
+          >
+            {isSubmitting ? (
+              'Creando cuenta...'
+            ) : (
+              <>
+                <UserPlus size={20} />
+                Crear Cuenta
+                <ArrowRight size={20} />
+              </>
+            )}
+          </button>
+
+          <div style={{ textAlign: 'center', marginTop: '1.5rem' }}>
+            <span style={{ color: 'rgba(255, 255, 255, 0.7)' }}>
+              ¿Ya tienes una cuenta?{' '}
+            </span>
+            <button
+              type="button"
+              onClick={() => navigate('/login')}
+              className="futuristic-link"
+              style={{
+                background: 'none',
+                border: 'none',
+                cursor: 'pointer',
+                fontSize: 'inherit',
+              }}
+            >
+              Iniciar Sesión
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  )
+}
