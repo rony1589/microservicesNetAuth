@@ -30,5 +30,5 @@ export type UpdateProductRequestDto = {
   description: string
   price: number
   category: string
-  status: boolean
+  status?: boolean
 }

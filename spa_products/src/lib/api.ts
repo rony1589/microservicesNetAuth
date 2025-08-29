@@ -22,14 +22,6 @@ api.interceptors.request.use((config) => {
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    console.error('API Error:', {
-      url: error.config?.url,
-      method: error.config?.method,
-      status: error.response?.status,
-      data: error.response?.data,
-      message: error.message,
-    })
-
     // Normaliza a ProblemDetails para UI
     const pd: ProblemDetails = error?.response?.data ?? {
       title: 'Error de conexión',

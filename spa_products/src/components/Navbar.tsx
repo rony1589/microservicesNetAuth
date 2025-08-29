@@ -1,6 +1,7 @@
 import { LogOut, Package, User, UserPlus } from 'lucide-react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuthStore } from '../store/authStore'
+import TokenStatus from './TokenStatus'
 
 export default function Navbar() {
   const user = useAuthStore((s) => s.user)
@@ -36,6 +37,7 @@ export default function Navbar() {
       >
         {user ? (
           <>
+            <TokenStatus />
             <div
               style={{
                 display: 'flex',

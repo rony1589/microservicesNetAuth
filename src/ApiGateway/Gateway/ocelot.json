@@ -1,5 +1,6 @@
 {
   "Routes": [
+    // ---- USERS: públicas (login / register) ----
     {
       "DownstreamPathTemplate": "/api/users/login",
       "DownstreamScheme": "http",
@@ -11,7 +12,7 @@
       ],
       "UpstreamPathTemplate": "/users/login",
       "UpstreamHttpMethod": [ "POST" ],
-      "Priority": 10
+      "Priority": 100
     },
     {
       "DownstreamPathTemplate": "/api/users/register",
@@ -24,8 +25,10 @@
       ],
       "UpstreamPathTemplate": "/users/register",
       "UpstreamHttpMethod": [ "POST" ],
-      "Priority": 10
+      "Priority": 100
     },
+
+    // ---- USERS: todo lo demás con JWT ----
     {
       "DownstreamPathTemplate": "/api/users/{**catchAll}",
       "DownstreamScheme": "http",
@@ -40,23 +43,11 @@
       "AuthenticationOptions": {
         "AuthenticationProviderKey": "Bearer",
         "AllowedScopes": []
-      }
+      },
+      "Priority": 10
     },
 
-    /* PRODUCTS: GET /products (lista). Si quieres que sea público, deja SIN auth. */
-    {
-      "DownstreamPathTemplate": "/api/products",
-      "DownstreamScheme": "http",
-      "DownstreamHostAndPorts": [
-        {
-          "Host": "localhost",
-          "Port": 5002
-        }
-      ],
-      "UpstreamPathTemplate": "/products",
-      "UpstreamHttpMethod": [ "GET" ]
-    },
-    /* PRODUCTS: resto de rutas (detalles, crear, editar, borrar) */
+    // ---- PRODUCTS: TODO con JWT (incluye /all, /create, /update/{id}, /delete/{id}, /{id}) ----
     {
       "DownstreamPathTemplate": "/api/products/{**catchAll}",
       "DownstreamScheme": "http",
@@ -71,7 +62,8 @@
       "AuthenticationOptions": {
         "AuthenticationProviderKey": "Bearer",
         "AllowedScopes": []
-      }
+      },
+      "Priority": 10
     }
   ],
   "GlobalConfiguration": {

@@ -13,7 +13,7 @@ public class ProductsController : ControllerBase
     private readonly IMediator _mediator;
     public ProductsController(IMediator mediator) { _mediator = mediator; }
 
-    [HttpGet]
+    [HttpGet("all")]
     [AllowAnonymous]
     public async Task<IEnumerable<ProductDto>> List(CancellationToken ct)
         => await _mediator.Send(new ListProductsQuery(), ct);
@@ -23,17 +23,17 @@ public class ProductsController : ControllerBase
     public async Task<ActionResult<ProductDto?>> Get(Guid id, CancellationToken ct)
         => Ok(await _mediator.Send(new GetProductQuery(id), ct));
 
-    [HttpPost]
+    [HttpPost("create")]
     [Authorize(Roles = "Admin")]
     public async Task<ActionResult<ProductDto>> Create([FromBody] CreateProductCommand cmd, CancellationToken ct)
         => Ok(await _mediator.Send(cmd, ct));
 
-    [HttpPut("{id:guid}")]
+    [HttpPut("update/{id:guid}")]
     [Authorize(Roles = "Admin")]
     public async Task<ActionResult<ProductDto>> Update(Guid id, [FromBody] UpdateProductCommand body, CancellationToken ct)
         => Ok(await _mediator.Send(body with { Id = id }, ct));
 
-    [HttpDelete("{id:guid}")]
+    [HttpDelete("delete/{id:guid}")]
     [Authorize(Roles = "Admin")]
     public async Task<IActionResult> Delete(Guid id, CancellationToken ct)
     {

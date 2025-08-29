@@ -1,24 +1,66 @@
 import { API_CONFIG, getApiUrl } from '../lib/config'
+import { isTokenValid } from '../lib/tokenValidator'
+import { useAuthStore } from '../store/authStore'
 import type {
   CreateProductRequestDto,
   ProductDto,
   UpdateProductRequestDto,
 } from '../types/product'
 
+// Función helper para manejar errores de respuesta
+const handleResponseError = (response: Response, responseText: string) => {
+  // Si es 401 (Unauthorized), hacer logout automático
+  if (response.status === 401) {
+    useAuthStore.getState().logout()
+    throw {
+      title: 'Sesión expirada',
+      detail: 'Tu sesión ha expirado. Por favor, inicia sesión nuevamente.',
+      status: response.status,
+    }
+  }
+
+  let error
+  try {
+    error = JSON.parse(responseText)
+    // Extract validation errors if they exist
+    if (error.extensions?.errors) {
+      const validationErrors = Object.entries(error.extensions.errors)
+        .map(
+          ([field, messages]) =>
+            `${field}: ${
+              Array.isArray(messages) ? messages.join(', ') : messages
+            }`
+        )
+        .join('; ')
+      error.detail = `Validation failed: ${validationErrors}`
+    }
+  } catch {
+    error = {
+      title: 'Error de conexión',
+      detail: responseText || 'Error desconocido',
+      status: response.status,
+    }
+  }
+  throw error
+}
+
 // Función para obtener el token del localStorage
 const getAuthToken = (): string | null => {
-  return localStorage.getItem('authToken')
+  const token = localStorage.getItem('authToken')
+
+  // Verificar si el token es válido
+  if (token && !isTokenValid(token)) {
+    // Hacer logout automático
+    useAuthStore.getState().logout()
+    return null
+  }
+
+  return token
 }
 
 export const getProducts = async (): Promise<ProductDto[]> => {
   const token = getAuthToken()
-  if (!token) {
-    throw new Error('No authentication token found')
-  }
-
   const url = getApiUrl(API_CONFIG.PRODUCTS.LIST)
-  console.log('Fetching products from URL:', url)
-  console.log('Token exists:', !!token)
 
   const response = await fetch(url, {
     method: 'GET',
@@ -29,30 +71,15 @@ export const getProducts = async (): Promise<ProductDto[]> => {
   })
 
   const responseText = await response.text()
-  console.log('Products response status:', response.status)
-  console.log('Products response text length:', responseText.length)
 
   if (!response.ok) {
-    console.error('Products error response:', responseText)
-    let error
-    try {
-      error = JSON.parse(responseText)
-    } catch {
-      error = {
-        title: 'Error de conexión',
-        detail: responseText || 'Error desconocido',
-        status: response.status,
-      }
-    }
-    throw error
+    handleResponseError(response, responseText)
   }
 
   let data
   try {
     data = JSON.parse(responseText)
-    console.log('Products data received:', data)
   } catch {
-    console.error('Failed to parse products response:', responseText)
     throw {
       title: 'Error de respuesta',
       detail: 'La respuesta no es un JSON válido',
@@ -80,17 +107,7 @@ export const getProduct = async (id: string): Promise<ProductDto> => {
   const responseText = await response.text()
 
   if (!response.ok) {
-    let error
-    try {
-      error = JSON.parse(responseText)
-    } catch {
-      error = {
-        title: 'Error de conexión',
-        detail: responseText || 'Error desconocido',
-        status: response.status,
-      }
-    }
-    throw error
+    handleResponseError(response, responseText)
   }
 
   let data
@@ -111,10 +128,6 @@ export const createProduct = async (
   product: CreateProductRequestDto
 ): Promise<ProductDto> => {
   const token = getAuthToken()
-  if (!token) {
-    throw new Error('No authentication token found')
-  }
-
   const response = await fetch(getApiUrl(API_CONFIG.PRODUCTS.CREATE), {
     method: 'POST',
     headers: {
@@ -127,17 +140,7 @@ export const createProduct = async (
   const responseText = await response.text()
 
   if (!response.ok) {
-    let error
-    try {
-      error = JSON.parse(responseText)
-    } catch {
-      error = {
-        title: 'Error de conexión',
-        detail: responseText || 'Error desconocido',
-        status: response.status,
-      }
-    }
-    throw error
+    handleResponseError(response, responseText)
   }
 
   let data
@@ -159,8 +162,11 @@ export const updateProduct = async (
   product: UpdateProductRequestDto
 ): Promise<ProductDto> => {
   const token = getAuthToken()
-  if (!token) {
-    throw new Error('No authentication token found')
+
+  // Include the id in the request body
+  const productWithId = {
+    ...product,
+    id: id,
   }
 
   const response = await fetch(getApiUrl(API_CONFIG.PRODUCTS.UPDATE(id)), {
@@ -169,23 +175,13 @@ export const updateProduct = async (
       'Content-Type': 'application/json',
       Authorization: `Bearer ${token}`,
     },
-    body: JSON.stringify(product),
+    body: JSON.stringify(productWithId),
   })
 
   const responseText = await response.text()
 
   if (!response.ok) {
-    let error
-    try {
-      error = JSON.parse(responseText)
-    } catch {
-      error = {
-        title: 'Error de conexión',
-        detail: responseText || 'Error desconocido',
-        status: response.status,
-      }
-    }
-    throw error
+    handleResponseError(response, responseText)
   }
 
   let data
@@ -218,16 +214,6 @@ export const deleteProduct = async (id: string): Promise<void> => {
 
   if (!response.ok) {
     const responseText = await response.text()
-    let error
-    try {
-      error = JSON.parse(responseText)
-    } catch {
-      error = {
-        title: 'Error de conexión',
-        detail: responseText || 'Error desconocido',
-        status: response.status,
-      }
-    }
-    throw error
+    handleResponseError(response, responseText)
   }
 }

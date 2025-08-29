@@ -2,6 +2,7 @@ import { createBrowserRouter, Navigate } from 'react-router-dom'
 import Layout from '../components/Layout'
 import ProtectedRoute from '../components/ProtectedRoute'
 import LoginPage from '../page/login/LoginPage'
+import ProductCreatePage from '../page/product/ProductCreatePage'
 import ProductEditPage from '../page/product/ProductEditPage'
 import ProductsPage from '../page/product/ProductsPage'
 import RegisterPage from '../page/register/RegisterPage'
@@ -21,6 +22,16 @@ export const router = createBrowserRouter([
       <Layout>
         <ProtectedRoute>
           <ProductsPage />
+        </ProtectedRoute>
+      </Layout>
+    ),
+  },
+  {
+    path: '/products/create',
+    element: (
+      <Layout>
+        <ProtectedRoute>
+          <ProductCreatePage />
         </ProtectedRoute>
       </Layout>
     ),

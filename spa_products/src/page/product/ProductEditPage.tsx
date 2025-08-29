@@ -3,8 +3,8 @@ import { useEffect, useState } from 'react'
 import toast from 'react-hot-toast'
 import { useNavigate, useParams } from 'react-router-dom'
 import ProductForm from '../../components/ProductForm'
+import { handleApiError } from '../../lib/errorHandler'
 import { getProduct, updateProduct } from '../../service/productsService'
-import type { ProblemDetails } from '../../types/problemDetails'
 import type { ProductDto, ProductFormData } from '../../types/product'
 
 export default function ProductEditPage() {
@@ -20,9 +20,8 @@ export default function ProductEditPage() {
         setLoading(true)
         const data = await getProduct(id)
         setEntity(data)
-      } catch (pd: unknown) {
-        const error = pd as ProblemDetails
-        toast.error(error?.title || 'No se pudo cargar el producto')
+      } catch (error: unknown) {
+        toast.error(handleApiError(error, 'No se pudo cargar el producto'))
       } finally {
         setLoading(false)
       }
@@ -38,15 +37,14 @@ export default function ProductEditPage() {
       })
       toast.success('Producto actualizado exitosamente')
       navigate('/')
-    } catch (pd: unknown) {
-      const error = pd as ProblemDetails
-      toast.error(error?.title || 'Error al actualizar el producto')
+    } catch (error: unknown) {
+      toast.error(handleApiError(error, 'Error al actualizar el producto'))
     }
   }
 
   if (loading) {
     return (
-      <div style={{ padding: '2rem', maxWidth: '800px', margin: '0 auto' }}>
+      <div style={{ padding: '2rem', maxWidth: '1200px', margin: '0 auto' }}>
         <div
           className="futuristic-container"
           style={{ textAlign: 'center', padding: '3rem' }}
@@ -63,7 +61,7 @@ export default function ProductEditPage() {
 
   if (!entity) {
     return (
-      <div style={{ padding: '2rem', maxWidth: '800px', margin: '0 auto' }}>
+      <div style={{ padding: '2rem', maxWidth: '1200px', margin: '0 auto' }}>
         <div
           className="futuristic-container"
           style={{ textAlign: 'center', padding: '3rem' }}

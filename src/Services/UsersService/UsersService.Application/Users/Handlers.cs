@@ -25,12 +25,31 @@ namespace UsersService.Application.Users
             if (await _repo.FindByEmailAsync(request.Email, ct) is not null)
                 throw new ConflictAppException(ErrorCode.Conflict, "Email already exists");
 
+            UserRole role = UserRole.Usuario; // Valor por defecto
+
+            if (!string.IsNullOrEmpty(request.Role))
+            {
+                // Intentar parsear como string primero
+                if (Enum.TryParse<UserRole>(request.Role, true, out var parsedRole))
+                {
+                    role = parsedRole;
+                }
+                // Si no funciona, intentar como número
+                else if (int.TryParse(request.Role, out var roleNumber))
+                {
+                    if (Enum.IsDefined(typeof(UserRole), roleNumber))
+                    {
+                        role = (UserRole)roleNumber;
+                    }
+                }
+            }
+
             var user = new User
             {
                 Id = Guid.NewGuid(),
                 Email = request.Email,
                 Name = request.Name,
-                Role = Enum.TryParse<UserRole>(request.Role, true, out var r) ? r : UserRole.Usuario,
+                Role = role,
                 IsActive = true,
                 CreatedAt = DateTime.UtcNow
             };

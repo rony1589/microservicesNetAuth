@@ -1,14 +1,28 @@
-import { RouterProvider } from 'react-router-dom'
-import { Toaster } from 'react-hot-toast'
 import { useEffect } from 'react'
+import { Toaster } from 'react-hot-toast'
+import { RouterProvider } from 'react-router-dom'
+import { isTokenValid } from '../lib/tokenValidator'
+import { initializeAuth, useAuthStore } from '../store/authStore'
 import { router } from './routes'
-import { initializeAuth } from '../store/authStore'
 
 export default function App() {
+  const { token, logout } = useAuthStore()
+
   useEffect(() => {
     // Inicializar autenticación al cargar la app
     initializeAuth()
   }, [])
+
+  useEffect(() => {
+    // Verificar token cada 30 segundos
+    const interval = setInterval(() => {
+      if (token && !isTokenValid(token)) {
+        logout()
+      }
+    }, 30000)
+
+    return () => clearInterval(interval)
+  }, [token, logout])
 
   return (
     <>

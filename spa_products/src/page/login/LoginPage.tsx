@@ -4,9 +4,9 @@ import { useForm } from 'react-hook-form'
 import toast from 'react-hot-toast'
 import { useNavigate } from 'react-router-dom'
 import { z } from 'zod'
+import { handleApiError } from '../../lib/errorHandler'
 import { login } from '../../service/authService'
 import { useAuthStore } from '../../store/authStore'
-import type { ProblemDetails } from '../../types/problemDetails'
 
 const schema = z.object({
   email: z.string().email('Email inválido'),
@@ -30,14 +30,8 @@ export default function LoginPage() {
       doLogin(res)
       toast.success('Inicio de sesión exitoso')
       navigate('/')
-    } catch (pd: unknown) {
-      const error = pd as ProblemDetails
-      console.error('Error completo:', error)
-
-      // Mostrar el mensaje de error más específico disponible
-      const errorMessage =
-        error?.detail || error?.title || 'Error en el inicio de sesión'
-      toast.error(errorMessage)
+    } catch (error: unknown) {
+      toast.error(handleApiError(error, 'Error en el inicio de sesión'))
     }
   }
 

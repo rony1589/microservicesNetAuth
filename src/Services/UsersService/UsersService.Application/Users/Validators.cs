@@ -10,8 +10,17 @@ public class RegisterUserValidator : AbstractValidator<RegisterUserCommand>
         RuleFor(x => x.Email).NotEmpty().EmailAddress();
         RuleFor(x => x.Name).NotEmpty().MaximumLength(120);
         RuleFor(x => x.Password).NotEmpty().MinimumLength(6);
-        RuleFor(x => x.Role).NotEmpty().Must(r => r is "Admin" or "User");
+
+        // Validación opcional para Role
+        When(x => !string.IsNullOrEmpty(x.Role), () =>
+        {
+            RuleFor(x => x.Role)
+                .Must(role => role!.Equals("Admin", StringComparison.OrdinalIgnoreCase) ||
+                             role!.Equals("Usuario", StringComparison.OrdinalIgnoreCase))
+                .WithMessage("Rol incorrecto");
+        });
     }
+
 }
 
 public class LoginUserValidator : AbstractValidator<LoginUserCommand>

@@ -1,15 +1,17 @@
 # ProductHub - Gestión de Productos
 
-Una aplicación web moderna para la gestión de productos con diseño futurista y funcionalidades completas de autenticación.
+Una aplicación web moderna para la gestión de productos con diseño futurista, sistema de autenticación robusto y funcionalidades completas de CRUD.
 
 ## 🚀 Características
 
 - **Diseño Futurista**: Interfaz moderna con efectos glassmorphism, gradientes y animaciones
-- **Autenticación Completa**: Login y registro de usuarios
-- **Gestión de Productos**: CRUD completo para productos
+- **Autenticación Robusta**: Sistema completo de login, registro y gestión de tokens JWT
+- **Validación de Tokens**: Verificación automática de expiración y renovación
+- **Gestión de Productos**: CRUD completo para productos con validación
+- **Manejo de Errores**: Sistema centralizado de manejo de errores con mensajes descriptivos
 - **Responsive**: Diseño adaptable a diferentes dispositivos
 - **TypeScript**: Tipado completo para mayor seguridad
-- **Validación**: Formularios validados con Zod
+- **Validación**: Formularios validados con Zod y validación de backend
 
 ## 🛠️ Tecnologías
 
@@ -18,15 +20,17 @@ Una aplicación web moderna para la gestión de productos con diseño futurista 
 - **Iconos**: Lucide React
 - **Formularios**: React Hook Form + Zod
 - **Estado**: Zustand
-- **HTTP**: Axios
+- **HTTP**: Fetch API con interceptores personalizados
 - **Notificaciones**: React Hot Toast
 - **Enrutamiento**: React Router DOM
+- **Autenticación**: JWT con validación automática
 
 ## 📋 Requisitos Previos
 
 - Node.js 18+
 - pnpm (recomendado) o npm
 - API Gateway configurado en puerto 5000
+- Microservicios de autenticación y productos funcionando
 
 ## 🔧 Instalación
 
@@ -61,6 +65,32 @@ Una aplicación web moderna para la gestión de productos con diseño futurista 
    ```bash
    pnpm run dev
    ```
+
+## 🔐 Sistema de Autenticación
+
+### Características del Sistema
+
+- **Persistencia de Token**: Almacenamiento seguro en localStorage
+- **Validación Automática**: Verificación de expiración de tokens JWT
+- **Logout Automático**: Cierre de sesión automático cuando el token expira
+- **Protección de Rutas**: Acceso restringido a usuarios autenticados
+- **Indicador Visual**: Muestra el tiempo restante del token
+- **Manejo de Errores 401**: Logout automático en respuestas no autorizadas
+
+### Flujo de Autenticación
+
+1. **Login/Registro**: Usuario se autentica y recibe token JWT
+2. **Persistencia**: Token se guarda en localStorage
+3. **Validación Periódica**: Se verifica la validez del token cada 30 segundos
+4. **Protección**: Todas las rutas de productos requieren autenticación
+5. **Expiración**: Logout automático cuando el token expira
+
+### Componentes de Seguridad
+
+- **TokenValidator**: Validación y decodificación de tokens JWT
+- **ProtectedRoute**: Protección de rutas con verificación de token
+- **TokenStatus**: Indicador visual del tiempo restante del token
+- **ErrorHandler**: Manejo centralizado de errores de autenticación
 
 ## 🗄️ Estructura de la Base de Datos
 
@@ -104,11 +134,11 @@ CREATE TABLE products (
 
 ### Productos (Requieren token)
 
-- `GET /api/products` - Listar productos
-- `GET /api/products/:id` - Obtener producto
-- `POST /api/products` - Crear producto
-- `PUT /api/products/:id` - Actualizar producto
-- `DELETE /api/products/:id` - Eliminar producto
+- `GET /products/all` - Listar productos
+- `GET /products/:id` - Obtener producto específico
+- `POST /products/create` - Crear producto
+- `PUT /products/:id` - Actualizar producto
+- `DELETE /products/:id` - Eliminar producto
 
 ## 🔧 Configuración del Backend
 
@@ -131,13 +161,27 @@ CREATE TABLE products (
 }
 ```
 
-**Error Response:**
+**Error Response (ProblemDetails):**
 
 ```json
 {
-  "title": "Error Title",
+  "type": "https://errors.yourdomain.com/common/validation-failed",
+  "title": "Validation failed",
   "status": 400,
-  "detail": "Error description"
+  "detail": "Validation failed",
+  "instance": {
+    "value": "/api/products/update/123",
+    "hasValue": true
+  },
+  "extensions": {
+    "errorCode": "VALIDATION_FAILED",
+    "correlationId": "3ba597d2-a8bd-41d6-b936-8a53dc4f4cf2",
+    "traceId": "0HNF6J8PV6B02:00000001",
+    "errors": {
+      "id": ["'Id' no debería estar vacío."],
+      "name": ["El nombre es requerido"]
+    }
+  }
 }
 ```
 
@@ -154,6 +198,7 @@ CREATE TABLE products (
 - **Iconos**: Lucide React para consistencia visual
 - **Colores**: Paleta de azules, púrpuras y acentos
 - **Notificaciones**: Toast centrados en la parte inferior
+- **Indicadores de Estado**: Colores dinámicos para el estado del token
 
 ## 📱 Funcionalidades
 
@@ -161,25 +206,40 @@ CREATE TABLE products (
 
 - ✅ Login con email y contraseña
 - ✅ Registro de nuevos usuarios
-- ✅ Validación de formularios
-- ✅ Manejo de errores
-- ✅ Persistencia de sesión
+- ✅ Validación de formularios con Zod
+- ✅ Manejo de errores centralizado
+- ✅ Persistencia de sesión con localStorage
+- ✅ Validación automática de tokens JWT
+- ✅ Logout automático en expiración
+- ✅ Indicador visual del tiempo restante del token
+- ✅ Protección de rutas con redirección automática
 
 ### Gestión de Productos
 
 - ✅ Listar productos con tabla futurista
-- ✅ Crear nuevos productos
+- ✅ Crear nuevos productos con validación
 - ✅ Editar productos existentes
-- ✅ Eliminar productos
+- ✅ Eliminar productos con confirmación
 - ✅ Estados visuales (activo/inactivo)
-- ✅ Validación de formularios
+- ✅ Validación de formularios en frontend y backend
+- ✅ Manejo de errores de validación específicos
+- ✅ Inclusión automática del ID en actualizaciones
 
 ### Navegación
 
-- ✅ Navbar responsive
-- ✅ Rutas protegidas
-- ✅ Redirección automática
+- ✅ Navbar responsive con información del usuario
+- ✅ Rutas protegidas con verificación de token
+- ✅ Redirección automática a login
 - ✅ Breadcrumbs visuales
+- ✅ Botón de logout con redirección
+
+### Manejo de Errores
+
+- ✅ Sistema centralizado de manejo de errores
+- ✅ Extracción de errores de validación específicos
+- ✅ Mensajes de error descriptivos en toasts
+- ✅ Manejo automático de errores 401 (Unauthorized)
+- ✅ Logout automático en tokens inválidos
 
 ## 🚀 Scripts Disponibles
 
@@ -200,9 +260,55 @@ pnpm run lint
 ## 🔒 Seguridad
 
 - Validación de formularios en frontend y backend
-- Manejo seguro de tokens JWT
-- Protección de rutas
+- Manejo seguro de tokens JWT con verificación de expiración
+- Protección de rutas con verificación automática
 - Sanitización de datos
+- Logout automático en tokens expirados
+- Manejo seguro de errores sin exponer información sensible
+
+## 🏗️ Arquitectura del Proyecto
+
+### Estructura de Archivos
+
+```
+src/
+├── app/                    # Configuración de la app
+│   ├── App.tsx            # Componente principal con verificación de token
+│   └── routes.tsx         # Configuración de rutas protegidas
+├── components/             # Componentes reutilizables
+│   ├── Navbar.tsx         # Barra de navegación con TokenStatus
+│   ├── ProductForm.tsx    # Formulario de productos con validación
+│   ├── ProtectedRoute.tsx # Protección de rutas con verificación de token
+│   └── TokenStatus.tsx    # Indicador visual del estado del token
+├── lib/                   # Utilidades y configuración
+│   ├── api.ts            # Configuración de interceptores HTTP
+│   ├── config.ts         # Configuración de rutas API
+│   ├── errorHandler.ts   # Sistema centralizado de manejo de errores
+│   ├── logger.ts         # Sistema de logging estructurado
+│   └── tokenValidator.ts # Validación y manejo de tokens JWT
+├── page/                  # Páginas de la aplicación
+│   ├── login/            # Página de login
+│   ├── register/         # Página de registro
+│   └── product/          # Páginas de productos (CRUD)
+├── service/              # Servicios de API
+│   ├── authService.ts    # Servicios de autenticación
+│   └── productsService.ts # Servicios de productos con manejo de errores
+├── store/                # Estado global (Zustand)
+│   └── authStore.ts      # Store de autenticación con persistencia
+├── types/                # Tipos TypeScript
+│   ├── product.ts        # Tipos de productos
+│   ├── user.ts           # Tipos de usuario
+│   └── problemDetails.ts # Tipos de errores
+└── index.css             # Estilos globales
+```
+
+### Flujo de Datos
+
+1. **Autenticación**: Login/Register → Token JWT → localStorage
+2. **Validación**: Verificación periódica → Logout automático si expira
+3. **Protección**: ProtectedRoute → Verificación de token → Redirección
+4. **API Calls**: Interceptores → Manejo de errores → Toast notifications
+5. **Estado**: Zustand store → Persistencia → Sincronización
 
 ## 🐛 Troubleshooting
 
@@ -218,21 +324,31 @@ Este error indica que las rutas del gateway no están configuradas correctamente
    VITE_API_BASE_URL=http://localhost:5000
    ```
 
-2. **Verificar que el gateway esté corriendo:**
-
-   ```bash
-   curl http://localhost:5000/health
-   ```
-
-3. **Verificar las rutas del gateway:**
+2. **Verificar las rutas del gateway:**
 
    - Asegúrate de que las rutas `/users/login` y `/users/register` estén configuradas
-   - Verifica que las rutas `/api/products/*` estén configuradas
+   - Verifica que las rutas `/products/*` estén configuradas correctamente
    - Confirma que el gateway esté enrutando correctamente a los microservicios
 
-4. **Verificar CORS:**
+### Error: "Sesión expirada"
 
-   Asegúrate de que el gateway permita peticiones desde `http://localhost:5173`
+Este error indica que el token JWT ha expirado.
+
+**Soluciones:**
+
+1. **Reiniciar sesión**: El sistema hará logout automático y redirigirá a login
+2. **Verificar configuración del backend**: Asegurar que los tokens JWT tengan tiempo de expiración adecuado
+3. **Verificar sincronización de tiempo**: Asegurar que el servidor y cliente tengan hora sincronizada
+
+### Error: "Validation failed"
+
+Este error indica problemas de validación en el backend.
+
+**Soluciones:**
+
+1. **Revisar datos enviados**: Verificar que todos los campos requeridos estén presentes
+2. **Verificar formato de datos**: Asegurar que los tipos de datos sean correctos
+3. **Revisar logs del backend**: Verificar los errores específicos de validación
 
 ### Error: "Failed to match Route configuration"
 
@@ -244,47 +360,6 @@ Este error sugiere un problema de configuración de rutas en el gateway.
 2. **Asegurar que los endpoints estén habilitados**
 3. **Verificar que el middleware de autenticación esté configurado correctamente**
 
-## 📦 Estructura del Proyecto
-
-```
-src/
-├── app/                 # Configuración de la app
-├── components/          # Componentes reutilizables
-├── lib/                 # Utilidades y configuración
-│   ├── api.ts          # Configuración de Axios
-│   └── config.ts       # Configuración de rutas API
-├── page/                # Páginas de la aplicación
-│   ├── login/          # Página de login
-│   ├── register/       # Página de registro
-│   └── product/        # Páginas de productos
-├── service/            # Servicios de API
-├── store/              # Estado global (Zustand)
-├── types/              # Tipos TypeScript
-└── index.css           # Estilos globales
-```
-
-## 🎯 Próximas Mejoras
-
-- [ ] Dashboard con estadísticas
-- [ ] Filtros y búsqueda de productos
-- [ ] Exportación de datos
-- [ ] Temas personalizables
-- [ ] Modo oscuro/claro
-- [ ] Notificaciones push
-- [ ] PWA (Progressive Web App)
-
-## 🤝 Contribución
-
-1. Fork el proyecto
-2. Crea una rama para tu feature (`git checkout -b feature/AmazingFeature`)
-3. Commit tus cambios (`git commit -m 'Add some AmazingFeature'`)
-4. Push a la rama (`git push origin feature/AmazingFeature`)
-5. Abre un Pull Request
-
 ## 📄 Licencia
 
 Este proyecto está bajo la Licencia MIT. Ver el archivo `LICENSE` para más detalles.
-
-## 📞 Soporte
-
-Si tienes alguna pregunta o problema, por favor abre un issue en el repositorio.

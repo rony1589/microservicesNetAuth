@@ -9,13 +9,13 @@ export const API_CONFIG = {
     REGISTER: '/users/register',
   },
 
-  // Rutas de productos (requieren token)
+  // Rutas de productos (ajustadas según los endpoints de la imagen)
   PRODUCTS: {
-    LIST: '/products',
+    LIST: '/products/all',
     GET: (id: string) => `/products/${id}`,
-    CREATE: '/products',
-    UPDATE: (id: string) => `/products/${id}`,
-    DELETE: (id: string) => `/products/${id}`,
+    CREATE: '/products/create',
+    UPDATE: (id: string) => `/products/update/${id}`,
+    DELETE: (id: string) => `/products/delete/${id}`,
   },
 
   // Timeout para las peticiones
@@ -31,8 +31,5 @@ export const API_CONFIG = {
 export const getApiUrl = (endpoint: string): string => {
   const baseUrl = API_CONFIG.BASE_URL || ''
   const fullUrl = `${baseUrl}${endpoint}`
-  console.log('getApiUrl - baseUrl:', baseUrl)
-  console.log('getApiUrl - endpoint:', endpoint)
-  console.log('getApiUrl - fullUrl:', fullUrl)
   return fullUrl
 }

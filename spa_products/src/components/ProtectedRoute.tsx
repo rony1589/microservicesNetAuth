@@ -1,5 +1,7 @@
 import type { ReactElement } from 'react'
+import { useEffect } from 'react'
 import { Navigate } from 'react-router-dom'
+import { isTokenValid } from '../lib/tokenValidator'
 import { useAuthStore } from '../store/authStore'
 
 export default function ProtectedRoute({
@@ -7,8 +9,19 @@ export default function ProtectedRoute({
 }: {
   children: ReactElement
 }) {
-  const token = useAuthStore((s) => s.token)
+  const { token, logout, isAuthenticated } = useAuthStore()
 
-  if (!token) return <Navigate to="/login" replace />
+  useEffect(() => {
+    // Verificar si el token es válido en cada renderizado
+    if (token && !isTokenValid(token)) {
+      logout()
+    }
+  }, [token, logout])
+
+  // Si no hay token o no está autenticado, redirigir a login
+  if (!token || !isAuthenticated) {
+    return <Navigate to="/login" replace />
+  }
+
   return children
 }

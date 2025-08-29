@@ -11,28 +11,29 @@ import {
 import { useEffect, useState } from 'react'
 import toast from 'react-hot-toast'
 import { Link } from 'react-router-dom'
-import ProductForm from '../../components/ProductForm'
-import {
-  createProduct,
-  deleteProduct,
-  getProducts,
-} from '../../service/productsService'
-import type { ProblemDetails } from '../../types/problemDetails'
-import type { ProductDto, ProductFormData } from '../../types/product'
+import ConfirmModal from '../../components/ConfirmModal'
+import { handleApiError } from '../../lib/errorHandler'
+import { deleteProduct, getProducts } from '../../service/productsService'
+import type { ProductDto } from '../../types/product'
 
 export default function ProductsPage() {
   const [products, setProducts] = useState<ProductDto[]>([])
   const [loading, setLoading] = useState(true)
-  const [showForm, setShowForm] = useState(false)
+  const [deleteModal, setDeleteModal] = useState<{
+    isOpen: boolean
+    product: ProductDto | null
+  }>({
+    isOpen: false,
+    product: null,
+  })
 
   const fetchProducts = async () => {
     try {
       setLoading(true)
       const data = await getProducts()
       setProducts(data)
-    } catch (pd: unknown) {
-      const error = pd as ProblemDetails
-      toast.error(error?.title || error?.detail || 'Error al cargar productos')
+    } catch (error: unknown) {
+      toast.error(handleApiError(error, 'Error al cargar productos'))
     } finally {
       setLoading(false)
     }
@@ -42,27 +43,28 @@ export default function ProductsPage() {
     fetchProducts()
   }, [])
 
-  const handleDelete = async (id: string) => {
+  const handleDeleteClick = (product: ProductDto) => {
+    setDeleteModal({
+      isOpen: true,
+      product,
+    })
+  }
+
+  const handleDeleteConfirm = async () => {
+    if (!deleteModal.product) return
+
     try {
-      await deleteProduct(id)
+      await deleteProduct(deleteModal.product.id)
       toast.success('Producto eliminado exitosamente')
+      setDeleteModal({ isOpen: false, product: null })
       fetchProducts()
-    } catch (pd: unknown) {
-      const error = pd as ProblemDetails
-      toast.error(error?.title || error?.detail || 'Error al eliminar producto')
+    } catch (error: unknown) {
+      toast.error(handleApiError(error, 'Error al eliminar producto'))
     }
   }
 
-  const onCreate = async (formData: ProductFormData) => {
-    try {
-      await createProduct(formData)
-      toast.success('Producto creado exitosamente')
-      setShowForm(false)
-      fetchProducts()
-    } catch (pd: unknown) {
-      const error = pd as ProblemDetails
-      toast.error(error?.title || error?.detail || 'Error al crear producto')
-    }
+  const handleDeleteCancel = () => {
+    setDeleteModal({ isOpen: false, product: null })
   }
 
   if (loading) {
@@ -90,40 +92,16 @@ export default function ProductsPage() {
           <Package size={32} style={{ marginRight: '0.5rem' }} />
           Productos
         </h1>
-        <button
-          onClick={() => setShowForm(true)}
-          className="futuristic-button"
-          style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}
-        >
-          <Plus size={20} />
-          Nuevo Producto
-        </button>
+        <Link to="/products/create">
+          <button
+            className="futuristic-button"
+            style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}
+          >
+            <Plus size={20} />
+            Nuevo Producto
+          </button>
+        </Link>
       </div>
-
-      {showForm && (
-        <div className="modal-overlay">
-          <div className="modal-content">
-            <ProductForm
-              onSubmit={onCreate}
-              submitText="Crear Producto"
-              defaultValues={{
-                name: '',
-                description: '',
-                price: 0,
-                category: '',
-                status: true,
-              }}
-            />
-            <button
-              onClick={() => setShowForm(false)}
-              className="futuristic-button"
-              style={{ marginTop: '1rem', width: '100%' }}
-            >
-              Cancelar
-            </button>
-          </div>
-        </div>
-      )}
 
       <div className="futuristic-table-container">
         <table className="futuristic-table">
@@ -218,7 +196,7 @@ export default function ProductsPage() {
                       Editar
                     </Link>
                     <button
-                      onClick={() => handleDelete(product.id)}
+                      onClick={() => handleDeleteClick(product)}
                       className="futuristic-button-small danger"
                       style={{
                         display: 'flex',
@@ -236,6 +214,17 @@ export default function ProductsPage() {
           </tbody>
         </table>
       </div>
+
+      <ConfirmModal
+        isOpen={deleteModal.isOpen}
+        onConfirm={handleDeleteConfirm}
+        onClose={handleDeleteCancel}
+        title="Eliminar Producto"
+        message={`¿Estás seguro de que quieres eliminar el producto "${deleteModal.product?.name}"? Esta acción no se puede deshacer.`}
+        confirmText="Eliminar"
+        cancelText="Cancelar"
+        type="danger"
+      />
     </div>
   )
 }

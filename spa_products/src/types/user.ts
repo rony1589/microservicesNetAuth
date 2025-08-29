@@ -1,3 +1,5 @@
+export type UserRole = 'Admin' | 'Usuario'
+
 export type UserDto = {
   id: string
   email: string
@@ -22,5 +24,5 @@ export type RegisterRequestDto = {
   email: string
   name: string
   password: string
-  role?: string
+  role?: UserRole // Completamente opcional
 }

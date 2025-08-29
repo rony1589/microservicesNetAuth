@@ -4,9 +4,9 @@ import { useForm } from 'react-hook-form'
 import toast from 'react-hot-toast'
 import { useNavigate } from 'react-router-dom'
 import { z } from 'zod'
+import { handleApiError } from '../../lib/errorHandler'
 import { register as registerUser } from '../../service/authService'
 import { useAuthStore } from '../../store/authStore'
-import type { ProblemDetails } from '../../types/problemDetails'
 
 const schema = z
   .object({
@@ -16,7 +16,7 @@ const schema = z
       .string()
       .min(6, 'La contraseña debe tener al menos 6 caracteres'),
     confirmPassword: z.string(),
-    role: z.string().optional(),
+    role: z.enum(['Admin', 'Usuario']).optional(),
   })
   .refine((data) => data.password === data.confirmPassword, {
     message: 'Las contraseñas no coinciden',
@@ -41,9 +41,8 @@ export default function RegisterPage() {
       doLogin(res)
       toast.success('Registro exitoso')
       navigate('/')
-    } catch (pd: unknown) {
-      const error = pd as ProblemDetails
-      toast.error(error?.title || error?.detail || 'Error en el registro')
+    } catch (error: unknown) {
+      toast.error(handleApiError(error, 'Error en el registro'))
     }
   }
 
@@ -220,9 +219,6 @@ export default function RegisterPage() {
               </div>
             )}
           </div>
-
-          {/* Campo oculto para el role */}
-          <input {...register('role')} type="hidden" value="User" />
 
           <button
             type="submit"
